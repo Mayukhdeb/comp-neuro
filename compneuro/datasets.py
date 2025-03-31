@@ -18,6 +18,8 @@ def get_sine_wave_data(num_points: int, noise: float = 0.0, test_data_fraction: 
 def get_line_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
     x = torch.linspace(0, 10, num_points).unsqueeze(1)  # Add batch dimension
     y = (2 * x + 1 + torch.randn_like(x) * noise)  # Add batch dimension
+    y = y /y.max()
+    y = y - 0.5
     
     x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
     
