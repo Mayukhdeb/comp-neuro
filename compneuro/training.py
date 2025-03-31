@@ -22,7 +22,9 @@ def train_model(
     video_frames_folder=None,
     save_video_as = None,
     video_fps=60,
-    device = "mps:0"
+    device = "mps:0",
+    ylim = 1.1,
+    noisy_data = False
 ) -> float:
     """
     Trains a model on the given dataset.
@@ -48,7 +50,7 @@ def train_model(
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
-    if dataset_name is not "drawn":
+    if dataset_name != "drawn":
         dataset = get_dataset(
             name=dataset_name,
             num_points=num_data_points,
@@ -84,15 +86,35 @@ def train_model(
                     fig = plt.figure(figsize=(8, 6))
                     plt.scatter(train_x.cpu().numpy(), train_y.cpu().numpy(), label="Train data", color="gray", alpha=0.3)
                     plt.scatter(test_x.cpu().numpy(), test_y.cpu().numpy(), label="Test data", color="red", linewidth=2)
+                    # Sort test_x and test_preds for line plot
+                    sorted_indices = torch.argsort(test_x.cpu(), dim=0)
+                    sorted_x = test_x.cpu()[sorted_indices].squeeze()
+                    sorted_preds = test_preds.cpu()[sorted_indices].squeeze()
+                    
+                    # Plot scatter points
                     plt.scatter(test_x.cpu().numpy(), test_preds.cpu().numpy(), label="Predicted", color="blue", linewidth=2)
+                    
+                    # Plot line with low alpha
+                    plt.plot(sorted_x.numpy(), sorted_preds.numpy(), color="blue", alpha=0.2)
                     plt.xlabel("Input")
                     plt.ylabel("Output")
+
+                    if noisy_data == True:
+                        plt.scatter(
+                            dataset["train_without_noise"]["x"].cpu().numpy(), 
+                            dataset["train_without_noise"]["y"].cpu().numpy(), 
+                            label="Train data (without noise)", color="green", alpha=0.3
+                        )
                     plt.legend()
+
                     # plt.tight_layout()
                     ## remove upper and right spine
                     plt.gca().spines['top'].set_visible(False)
                     plt.gca().spines['right'].set_visible(False)
                     plt.title(f"Epoch {step}: Loss = {loss.item():.4f}")
+                    
+                    if ylim is not None:
+                        plt.ylim(-ylim, ylim)
                     filename = os.path.join(video_frames_folder, f"epoch_{step:04d}.png")
                     fig.savefig(filename)
                     plt.close()
