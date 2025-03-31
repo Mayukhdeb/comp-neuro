@@ -32,6 +32,8 @@ def get_zigzag_line_data(num_points: int, noise: float = 0.0, test_size: float =
 
     x = x/x.max()
     y = y/y.max()
+    x = x - 0.5
+    y = y - 0.5
 
     x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_size, random_state=0)
     
@@ -48,4 +50,5 @@ dataset_map = {
 }
 
 def get_dataset(name: str, num_points: int, noise: float = 0.0, test_size: float = 0.2):
+    assert name in dataset_map, f"Dataset {name} not found! Please choose from {list(dataset_map.keys())}"
     return dataset_map[name](num_points, noise, test_size)
