@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.widgets import Button
+from .utils.seed import seed_everything
 
 def get_sine_wave_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
     x = torch.linspace(0, 2 * 3.14159, num_points).unsqueeze(1)  # Add batch dimension
@@ -16,8 +17,8 @@ def get_sine_wave_data(num_points: int, noise: float = 0.0, test_data_fraction: 
     }
 
 def get_line_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
-    x = torch.linspace(0, 10, num_points).unsqueeze(1)  # Add batch dimension
-    y = (2 * x + 1 + torch.randn_like(x) * noise)  # Add batch dimension
+    x = torch.linspace(0, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = (4 * x + 1 + torch.randn_like(x) * noise)  # Add batch dimension
     y = y /y.max()
     y = y - 0.5
     
@@ -133,6 +134,20 @@ def get_sin_relu_data(num_points: int, noise: float = 0.0, test_data_fraction: f
         "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
     }
 
+def noisy_line(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    seed_everything(0)
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = x 
+    y_noisy = 0.4 * torch.sin(2* torch.pi * x) + y + torch.randn_like(x) * noise  # Target function
+    
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y_noisy.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train, dtype=torch.float32), "y": torch.tensor(y_train, dtype=torch.float32)},
+        "train_without_noise": {"x": torch.tensor(x, dtype=torch.float32), "y": torch.tensor(y, dtype=torch.float32)},
+        "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
+    }
+
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -199,6 +214,7 @@ dataset_map = {
     "wedge": get_wedge_data,
     "elbow": get_elbow_data,
     "sin_relu": get_sin_relu_data,
+    "noisy_line": noisy_line,
 }
 
 def get_dataset(name: str, num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
