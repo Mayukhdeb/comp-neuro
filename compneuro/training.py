@@ -21,7 +21,8 @@ def train_model(
     visualize_every_nth_step=1,
     video_frames_folder=None,
     save_video_as = None,
-    video_fps=60
+    video_fps=60,
+    device = "mps:0"
 ) -> float:
     """
     Trains a model on the given dataset.
@@ -43,6 +44,7 @@ def train_model(
     if video_frames_folder is not None:
         os.system(f"rm -rf {video_frames_folder} && mkdir -p {video_frames_folder}")
 
+    model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
@@ -58,8 +60,8 @@ def train_model(
             test_data_fraction=test_data_fraction
         )
     
-    train_x, train_y = dataset["train"]["x"], dataset["train"]["y"]
-    test_x, test_y = dataset["test"]["x"], dataset["test"]["y"]
+    train_x, train_y = dataset["train"]["x"].to(device), dataset["train"]["y"].to(device)
+    test_x, test_y = dataset["test"]["x"].to(device), dataset["test"]["y"].to(device)
 
     train_dataset = TensorDataset(train_x, train_y)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -69,6 +71,7 @@ def train_model(
     
     for epoch in tqdm(range(num_epochs), desc="Training"):
         for batch_x, batch_y in train_loader:
+            batch_x, batch_y = batch_x.to(device), batch_y.to(device)
             optimizer.zero_grad()
             predictions = model(batch_x)
             loss = criterion(predictions, batch_y)
@@ -79,9 +82,9 @@ def train_model(
                 with torch.no_grad():
                     test_preds = model(test_x)
                     fig = plt.figure(figsize=(8, 6))
-                    plt.scatter(train_x.numpy(), train_y.numpy(), label="Train data", color="gray", alpha=0.3)
-                    plt.scatter(test_x.numpy(), test_y.numpy(), label="Test data", color="red", linewidth=2)
-                    plt.scatter(test_x.numpy(), test_preds.numpy(), label="Predicted", color="blue", linewidth=2)
+                    plt.scatter(train_x.cpu().numpy(), train_y.cpu().numpy(), label="Train data", color="gray", alpha=0.3)
+                    plt.scatter(test_x.cpu().numpy(), test_y.cpu().numpy(), label="Test data", color="red", linewidth=2)
+                    plt.scatter(test_x.cpu().numpy(), test_preds.cpu().numpy(), label="Predicted", color="blue", linewidth=2)
                     plt.xlabel("Input")
                     plt.ylabel("Output")
                     plt.legend()
