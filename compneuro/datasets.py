@@ -28,6 +28,18 @@ def get_line_data(num_points: int, noise: float = 0.0, test_data_fraction: float
         "test": {"x": torch.tensor(x_test), "y": torch.tensor(y_test)},
     }
 
+def get_line_through_zero_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    x = torch.linspace(0, 10, num_points).unsqueeze(1)  # Add batch dimension
+    y = (2 * x + 1 + torch.randn_like(x) * noise)  # Add batch dimension
+    y = y /y.max()
+    
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train), "y": torch.tensor(y_train)},
+        "test": {"x": torch.tensor(x_test), "y": torch.tensor(y_test)},
+    }
+
 def get_zigzag_line_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
     x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
     y = (torch.abs((x * 4 % 4) - 2) * 5 + torch.randn_like(x) * noise) # Add batch dimension
@@ -48,6 +60,52 @@ def get_zigzag_line_data(num_points: int, noise: float = 0.0, test_data_fraction
     }
 
 
+def get_wedge_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    # Create base x values
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)
+    
+    # Create wedge shape (^) with absolute value
+    y = (1 - torch.abs(x) * 2) + torch.randn_like(x) * noise
+    
+    # Normalize to range [-0.5, 0.5]
+    x = x - x.min()
+    y = y - y.min()
+    x = x / x.max() - 0.5
+    y = y / y.max() - 0.5
+    
+    # Split into train and test sets
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train), "y": torch.tensor(y_train)},
+        "test": {"x": torch.tensor(x_test), "y": torch.tensor(y_test)},
+    }
+
+def get_x_square_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = (x ** 2 + torch.randn_like(x) * noise)  # Add batch dimension
+    
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train), "y": torch.tensor(y_train)},
+        "test": {"x": torch.tensor(x_test), "y": torch.tensor(y_test)},
+    }
+
+def get_x_sin_x_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = torch.where(
+        x != 0, 
+        x * torch.sin(1 / x) + torch.randn_like(x) * noise, 
+        torch.tensor(0.0)  # Define f(0) = 0 explicitly
+    )
+    
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train, dtype=torch.float32), "y": torch.tensor(y_train, dtype=torch.float32)},
+        "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
+    }
 
 import numpy as np
 import torch
@@ -109,7 +167,10 @@ def get_drawn_data(test_data_fraction: float = 0.2):
 dataset_map = {
     "sine_wave": get_sine_wave_data,
     "line": get_line_data,
+    "line_through_zero": get_line_through_zero_data,
     "zigzag_line": get_zigzag_line_data,
+    "x_square": get_x_square_data,
+    "wedge": get_wedge_data,
 }
 
 def get_dataset(name: str, num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
