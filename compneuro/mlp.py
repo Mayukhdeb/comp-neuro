@@ -28,41 +28,60 @@ def build_mlp_model(size_sequence: list[int], activation=nn.ReLU(), bias = False
     model = nn.Sequential(*layers)
     return model
 
-def visualize_mlp(model, save_as: str = None, fig_width=10, fig_height=5):
+def visualize_mlp(model, save_as: str = None, fig_width=10, fig_height=8):
     """
     Visualize the model weights in matplotlib with nodes as units and lines as weights absolute values.
 
     Parameters:
         model (nn.Sequential): PyTorch Sequential model to visualize
         save_as (str, optional): If provided, save the visualization to this file path
+        fig_width (float): Width of the figure in inches
+        fig_height (float): Height of the figure in inches
     """
-    figsize = (fig_width, fig_height)
     linear_layers = [layer for layer in model if isinstance(layer, nn.Linear)]
     num_layers = len(linear_layers)
     num_units = [linear_layers[0].in_features] + [layer.out_features for layer in linear_layers]
+    max_units = max(num_units)
+    # Auto-determine figure size based on network architecture
+    auto_width = max(fig_width, num_layers * 2)  # Scale width by number of layers
+    auto_height = max(fig_height, max_units * 0.75)  # Scale height by maximum layer size
     
-    fig, ax = plt.subplots(figsize=figsize)
+    # Create figure with calculated size
+    fig, ax = plt.subplots(figsize=(auto_width, auto_height))
     ax.axis('off')
-    ax.set_aspect('equal')
-
-    # Define padding
-    x_pad = 0.5  # Space on the x-axis
-    y_pad = 0.2  # Space on the y-axis for centering nodes properly
-
-    ax.set_xlim(-x_pad, num_layers + x_pad)
-    ax.set_ylim(-y_pad - max(num_units) / 2, y_pad + max(num_units) / 2)
-
+    
+    # Calculate the horizontal spacing between layers
+    x_spacing = 1.0
+    
+    # Calculate the maximum vertical space needed
+    max_units = max(num_units)
+    y_unit_spacing = 1.0  # Space between nodes in a layer
+    
+    # Set consistent boundaries for the plot
+    x_min = -0.5
+    x_max = (num_layers) * x_spacing + 0.5
+    y_min = -max_units * y_unit_spacing / 2 - 0.5
+    y_max = max_units * y_unit_spacing / 2 + 0.5
+    
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    
     # Store node positions
     nodes_positions = {}
     for layer_idx in range(num_layers + 1):
         layer_units = num_units[layer_idx]
         for unit_idx in range(layer_units):
-            # Center y-positions dynamically
-            y_pos = unit_idx - (layer_units - 1) / 2
-            nodes_positions[(layer_idx, unit_idx)] = (layer_idx, y_pos)
+            # Center nodes vertically and space them evenly
+            if layer_units > 1:
+                y_pos = unit_idx * y_unit_spacing - (layer_units - 1) * y_unit_spacing / 2
+            else:
+                y_pos = 0
+            
+            x_pos = layer_idx * x_spacing
+            nodes_positions[(layer_idx, unit_idx)] = (x_pos, y_pos)
             
             # Draw node
-            circle = plt.Circle((layer_idx, y_pos), 0.1, fill=True, color='blue', clip_on=True)
+            circle = plt.Circle((x_pos, y_pos), 0.1, fill=True, color='blue', clip_on=False)
             ax.add_patch(circle)
 
     # Draw connections between nodes
@@ -81,14 +100,16 @@ def visualize_mlp(model, save_as: str = None, fig_width=10, fig_height=5):
                 color = 'red' if weight < 0 else 'green'
                 
                 ax.plot([start[0], end[0]], [start[1], end[1]], 
-                        color=color, linewidth=thickness, alpha=0.6, clip_on=True)
+                        color=color, linewidth=thickness, alpha=0.6)
 
     ax.set_title(f"MLP Architecture: {' → '.join(map(str, num_units))}")
-
+    
+    # Maintain aspect ratio to avoid distortion
+    # ax.set_aspect('equal')
+    
+    plt.tight_layout()
+    
     if save_as:
         plt.savefig(save_as, dpi=300, bbox_inches='tight')
-
-    plt.tight_layout()
-    plt.show()
-
+    
     return fig, ax
