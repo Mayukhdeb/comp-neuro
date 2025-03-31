@@ -72,6 +72,8 @@ def get_wedge_data(num_points: int, noise: float = 0.0, test_data_fraction: floa
     y = y - y.min()
     x = x / x.max() - 0.5
     y = y / y.max() - 0.5
+
+    x = x - x.min()
     
     # Split into train and test sets
     x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
@@ -113,6 +115,17 @@ def get_elbow_data(num_points: int, noise: float = 0.0, test_data_fraction: floa
 
     # x = x - 0.5
     y = -(y - 0.5)
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train, dtype=torch.float32), "y": torch.tensor(y_train, dtype=torch.float32)},
+        "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
+    }
+
+def get_sin_relu_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = 0.6 * torch.sin(2* torch.pi * x) + x + torch.randn_like(x) * noise  # Target function with noise
+    
     x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
     
     return {
@@ -185,6 +198,7 @@ dataset_map = {
     "x_square": get_x_square_data,
     "wedge": get_wedge_data,
     "elbow": get_elbow_data,
+    "sin_relu": get_sin_relu_data,
 }
 
 def get_dataset(name: str, num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
