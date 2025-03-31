@@ -10,7 +10,7 @@ num_epochs = 100
 batch_size = 32 
 
 # Initialize model
-model = build_mlp_model(size_sequence=[1, 20, 10, 1], activation=nn.LeakyReLU())  # Using Tanh for sine fitting
+model = build_mlp_model(size_sequence=[1, 20, 10, 1], activation=nn.LeakyReLU(), bias=True)  # Using Tanh for sine fitting
 
 test_loss = train_model(
     model=model,
