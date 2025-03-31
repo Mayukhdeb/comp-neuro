@@ -1,7 +1,8 @@
 import torch.nn as nn
 import matplotlib.pyplot as plt
+from .utils.seed import seed_everything
 
-def build_mlp_model(size_sequence: list[int], activation=nn.ReLU(), bias = False):
+def build_mlp_model(size_sequence: list[int], activation=None, bias = False):
     """
     Create a PyTorch model based on the given size sequence, with a custom activation function.
 
@@ -12,8 +13,11 @@ def build_mlp_model(size_sequence: list[int], activation=nn.ReLU(), bias = False
     Returns:
         nn.Sequential: A PyTorch Sequential model consisting of linear layers with specified activations between them.
     """
+    seed_everything(0)
     layers = []
     num_layers = len(size_sequence)
+    if activation is None:
+        activation = nn.Identity()
     
     # Loop through the size_sequence list to add Linear and activation layers
     for i in range(num_layers - 1):
