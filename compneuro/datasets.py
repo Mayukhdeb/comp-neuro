@@ -107,6 +107,19 @@ def get_x_sin_x_data(num_points: int, noise: float = 0.0, test_data_fraction: fl
         "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
     }
 
+def get_elbow_data(num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
+    x = torch.linspace(-1, 1, num_points).unsqueeze(1)  # Add batch dimension
+    y = torch.relu(x) + torch.randn_like(x) * noise  # Add batch dimension
+
+    # x = x - 0.5
+    y = -(y - 0.5)
+    x_train, x_test, y_train, y_test = train_test_split(x.numpy(), y.numpy(), test_size=test_data_fraction, random_state=0)
+    
+    return {
+        "train": {"x": torch.tensor(x_train, dtype=torch.float32), "y": torch.tensor(y_train, dtype=torch.float32)},
+        "test": {"x": torch.tensor(x_test, dtype=torch.float32), "y": torch.tensor(y_test, dtype=torch.float32)},
+    }
+
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -171,6 +184,7 @@ dataset_map = {
     "zigzag_line": get_zigzag_line_data,
     "x_square": get_x_square_data,
     "wedge": get_wedge_data,
+    "elbow": get_elbow_data,
 }
 
 def get_dataset(name: str, num_points: int, noise: float = 0.0, test_data_fraction: float = 0.2):
