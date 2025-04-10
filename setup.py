@@ -11,7 +11,7 @@ setuptools.setup(
     description="code/material for the computational neuroscience course @ Georgia Tech",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Mayukhdeb/comp-neuro",
+    url="https://github.com/murtylab/comp-neuro",
     packages=setuptools.find_packages(),
     install_requires=None,
 )
