@@ -3,8 +3,8 @@ code/material for the computational neuroscience course
 
 | Notebook   | Link  |
 |------------|-------------------------------------------|
-| Demo       | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mayukhdeb/comp-neuro/blob/master/notebooks/compneuro-demo.ipynb) |
-| Playground | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mayukhdeb/comp-neuro/blob/master/notebooks/compneuro-playground.ipynb) |
+| Demo       | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/murtylab/comp-neuro/blob/master/notebooks/compneuro-demo.ipynb) |
+| Playground | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/murtylab/comp-neuro/blob/master/notebooks/compneuro-playground.ipynb) |
 
 
 Setup steps:
