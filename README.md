@@ -12,7 +12,7 @@ Setup steps:
 1. Clone the repo
 
 ```bash
-git clone git@github.com:Mayukhdeb/comp-neuro.git
+git clone git@github.com:murtylab/comp-neuro.git
 ```
 
 2. Run the setup command:
